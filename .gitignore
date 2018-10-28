@@ -1,0 +1,7 @@
+/vendor
+/.vscode
+/.idea
+.env
+/docker/data/mysql
+/public/api.json
+/public/storage
