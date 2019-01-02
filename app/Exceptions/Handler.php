@@ -10,11 +10,12 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use App\Presenters\Error;
 
 class Handler extends ExceptionHandler
 {
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected $dontReport = [
         AuthorizationException::class,
@@ -33,7 +34,7 @@ class Handler extends ExceptionHandler
     ];
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     public function render($request, Exception $exception)
     {
@@ -44,9 +45,7 @@ class Handler extends ExceptionHandler
                 $code = $this->resolveHttpStatus($exception);
             }
             return $exception->response ?? new JsonResponse(
-                [
-                    'message' => $exception->getMessage()
-                ],
+                (new Error($exception->getMessage()))->present(),
                 $code
             );
         }

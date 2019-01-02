@@ -1,0 +1,28 @@
+version: '2.1'
+services:
+  php:
+    build: ./docker/php
+    tty: true
+    links:
+      - mysql
+    volumes:
+      - ./:/www
+    networks:
+      - github-interaction
+
+  mysql:
+    image: mariadb
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+    tty: true
+    volumes:
+      - data:/var/lib/mysql
+    networks:
+      - github-interaction
+
+volumes:
+  data:
+
+networks:
+  github-interaction:
+    external: true

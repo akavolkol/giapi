@@ -2,13 +2,25 @@
 
 namespace App\Presenters;
 
+use ArrayAccess;
+
 abstract class Presenter
 {
+    /**
+     * @var array
+     */
     protected $map = [];
 
+    /**
+     * @var int|null
+     */
     protected $modifier;
 
-    public function present($data)
+    /**
+     * @param mixed $data
+     * @return array
+     */
+    public function present(ArrayAccess $data): array
     {
         return array_reduce(array_keys($data), function ($carry, $key) use ($data) {
             if (isset($this->map[$key])) {
@@ -20,12 +32,18 @@ abstract class Presenter
         }, []);
     }
 
+    /**
+     * @param int $modifier
+     */
     public function setModifier(int $modifier)
     {
         $this->modifier = $modifier;
     }
 
-    public function getModifier()
+    /**
+     * @return int|null
+     */
+    public function getModifier(): ?int
     {
         return $this->modifier;
     }

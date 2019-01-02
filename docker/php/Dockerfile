@@ -29,6 +29,7 @@ RUN apk --update add \
   php7-xmlwriter \
   php7-xdebug \
   php7-zip \
+  make \
   && rm -rf /var/cache/apk/*
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer

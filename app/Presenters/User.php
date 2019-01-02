@@ -21,7 +21,10 @@ class User extends Presenter
 {
     const MOD_REGISTERED = 0;
 
-    public function present($attribute)
+    /**
+     * {@inheritDoc}
+     */
+    public function present($attribute): array
     {
         if ($this->getModifier() === self::MOD_REGISTERED) {
             $data = [

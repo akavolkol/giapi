@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Requests\SendMessageForGitHubUsers;
+use App\Presenters\Error;
 use App\Services\GitHub\Repository;
 use App\Mail\GitHubUser as GitHubUserMail;
 use App\Services\Weather\WeatherService;
@@ -12,13 +13,9 @@ class GitHubUser extends RestController
     /**
      * @OA\Get(
      *  path="/github/send-email",
-     *  @OA\Header(
-     *      header="Authorization",
-     *      required=true,
-     *      @OA\Schema(
-     *             type="string"
-     *         )
-     *  ),
+     *  security={
+     *      {"bearerAuth": {}}
+     *  },
      *  @OA\RequestBody(
      *      @OA\JsonContent(
      *          @OA\Property(
@@ -34,15 +31,36 @@ class GitHubUser extends RestController
      *              property="message",
      *              description="A text message",
      *              type="string",
-     *              example="Hi, there"
+     *              example="Hi there"
      *          ),
      *     ),
      *  ),
      *  @OA\Response(
-     *      response="200",
-     *      description="Send email",
-     *      @OA\JsonContent()
-     *  )
+     *      response="202",
+     *      description="Some additional details may be specified",
+     *      @OA\JsonContent(
+     *          oneOf={
+     *              @OA\Schema(),
+     *              @OA\Schema(
+     *                  @OA\Property(
+     *                      property="usernames",
+     *                      description="List of user names",
+     *                      type="array",
+     *                      @OA\Items(
+     *                          type="string",
+     *                          example="username"
+     *                      )
+     *                  ),
+     *                  @OA\Property(
+     *                      property="message",
+     *                      ref="#/components/schemas/ErrorPresenter",
+     *                      example="Some of the users didn't specify a public email address"
+     *                  )
+     *              )
+     *          },
+     *      ),
+     *     )
+     *  ),
      * )
      *
      * @param Repository $gitHubRepository
@@ -59,10 +77,27 @@ class GitHubUser extends RestController
         $request->validate();
         $userNames = $request->get('users');
         $message = $request->get('message');
+        $usersWithoutEmail = [];
         foreach ($gitHubRepository->usersDetails($userNames) as $user) {
-            $weather = $weatherService->current($user['location']);
-            $this->container->mailer->queue(new GitHubUserMail($user, $message, $weather));
+            if ($user['email']) {
+                $weather = $weatherService->current($user['location']);
+                $this->container->mailer->queue(new GitHubUserMail($user, $message, $weather));
+            } else {
+                array_push($usersWithoutEmail, $user['login']);
+            }
         }
-        return $this->response([]);
+        return $this->response(
+            empty($usersWithoutEmail)
+                ? []
+                : $this
+                    ->getErrorPresenter('Some of the users didn\'t specify a public email address')
+                    ->present(['usernames' => $usersWithoutEmail]),
+            202
+        );
+    }
+
+    protected function getErrorPresenter(string $message)
+    {
+        return new Error($message);
     }
 }

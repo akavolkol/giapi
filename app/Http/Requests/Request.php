@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Presenters\Error;
 use Illuminate\Http\Request as BaseRequest;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\JsonResponse;
@@ -41,6 +42,13 @@ class Request extends BaseRequest
      */
     protected function throwValidationException($validator)
     {
-        throw new ValidationException($validator, new JsonResponse($validator->errors()->getMessages(), 422));
+        throw new ValidationException(
+            $validator,
+            new JsonResponse(
+                (new Error('Validation failed'))
+                    ->present(['fields' => $validator->errors()->getMessages()]),
+                422
+            )
+        );
     }
 }

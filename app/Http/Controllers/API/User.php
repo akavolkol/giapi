@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Auth\Auth;
 use App\Http\Requests\{Auth as AuthRequest, User as UserRequest};
 use App\Models\User as UserModel;
+use App\Presenters\Error;
 use App\Presenters\User as UserPresenter;
 use Intervention\Image\ImageManagerStatic as Image;
 
@@ -42,15 +43,16 @@ class User extends RestController
      *      description="Add new user",
      *      @OA\JsonContent(
      *          @OA\Property(property="user", ref="#/components/schemas/UserPresenter"),
-     *          @OA\Property(property="token", type="string", example="dfsd")
+     *          @OA\Property(property="token", ref="#/components/schemas/JWT")
      *      )
      *   )
      * )
-     * @param User $request
+     * @param UserRequest $request
      * @param UserPresenter $userPresenter
      * @param Auth $auth
      * @return \Illuminate\Http\JsonResponse
      * @throws \Illuminate\Validation\ValidationException
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      */
     public function create(UserRequest $request, UserPresenter $userPresenter, Auth $auth)
     {
@@ -90,28 +92,27 @@ class User extends RestController
      * @OA\Post(
      *  path="/auth",
      *  @OA\RequestBody(
-     *     @OA\JsonContent(
-     *  @OA\Parameter(
-     *      name="email",
-     *      @OA\Schema(
-     *          type="string",
-     *      ),
-     *  ),
-     *  @OA\Parameter(
-     *      name="password",
-     *
-     *      @OA\Schema(
-     *          type="string",
-     *      )
-     *  ),
+     *      @OA\JsonContent(
+     *          @OA\Parameter(
+     *              name="email",
+     *              @OA\Schema(
+     *                  type="string",
+     *              ),
+     *          ),
+     *          @OA\Parameter(
+     *              name="password",
+     *              @OA\Schema(
+     *                  type="string",
+     *              )
+     *          ),
      *     ),
-     *     ),
+     *  ),
      *  @OA\Response(
      *      response="200",
      *      description="Authorize user by credentials",
      *      @OA\JsonContent(
      *          @OA\Property(property="user", ref="#/components/schemas/UserPresenter"),
-     *          @OA\Property(property="token", ref="#/components/schemas/JWT", type="string", example="dfsd")
+     *          @OA\Property(property="token", ref="#/components/schemas/JWT")
      *      )
      *  ),
      *  @OA\Response(
@@ -120,13 +121,33 @@ class User extends RestController
      *      @OA\JsonContent(
      *          @OA\Property(property="message", example="Wrong credentials"),
      *      )
-     *  )
+     *  ),
+     *  @OA\Response(
+     *      response="422",
+     *      description="Validation failed",
+     *      @OA\JsonContent(
+     *          @OA\Property(property="message", example="Validation failed"),
+     *          @OA\Property(
+     *              property="fields",
+     *              type="object",
+     *              @OA\Property(
+     *                  property="email",
+     *                  type="array",
+     *                  @OA\Items(
+     *                      type="string",
+     *                      example="The email field is required."
+     *                  )
+     *              )
+     *          )
+     *      )
+     *  ),
      * )
      *
      * @param AuthRequest $request
      * @param UserPresenter $userPresenter
      * @param Auth $auth
      * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
      */
     public function auth(AuthRequest $request, UserPresenter $userPresenter, Auth $auth)
     {
@@ -135,7 +156,7 @@ class User extends RestController
         $password = $request->get('password');
         $user = UserModel::where('email', $email)->first();
         if (!password_verify($password, $user->password)) {
-            return $this->response(['message' => 'Wrong credentials'], 403);
+            return $this->response((new Error('Wrong credentials'))->present(), 403);
         }
         $userPresenter->setModifier(UserPresenter::MOD_REGISTERED);
         return $this->response([
