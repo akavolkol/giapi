@@ -1,14 +1,18 @@
 <?php
 
-abstract class TestCase extends Laravel\Lumen\Testing\TestCase
+namespace Tests;
+
+use PHPUnit\Framework\TestCase as BaseTestCase;
+
+abstract class TestCase extends BaseTestCase
 {
-    /**
-     * Creates the application.
-     *
-     * @return \Laravel\Lumen\Application
-     */
-    public function createApplication()
+    protected $app;
+
+    public function app()
     {
-        return require __DIR__.'/../app/app.php';
+        if (is_null($this->app)) {
+            $this->app = require __DIR__ . '/../app/app.php';
+        }
+        return $this->app;
     }
 }

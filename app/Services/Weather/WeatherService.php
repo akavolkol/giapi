@@ -29,7 +29,7 @@ class WeatherService
      */
     public function current(string $location): ?Weather
     {
-        return ($this->provider ?? new OpenWeatherMap($this->config))->current($location);
+        return ($this->provider ?? $this->defaultProvider())->current($location);
     }
 
     /**
@@ -38,5 +38,13 @@ class WeatherService
     public function provider(ProviderContract $provider)
     {
         $this->provider = $provider;
+    }
+
+    /**
+     * @return OpenWeatherMap
+     */
+    protected function defaultProvider(): OpenWeatherMap
+    {
+        return new OpenWeatherMap($this->config);
     }
 }

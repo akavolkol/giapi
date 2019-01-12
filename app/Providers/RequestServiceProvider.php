@@ -8,6 +8,9 @@ use App\Http\Requests\Request;
 
 class RequestServiceProvider extends ServiceProvider
 {
+    /**
+     * @return void
+     */
     public function boot()
     {
         $this->app->resolving(Request::class, function (Request $request, Container $app) {

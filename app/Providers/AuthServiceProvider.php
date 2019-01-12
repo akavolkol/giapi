@@ -17,6 +17,7 @@ class AuthServiceProvider extends ServiceProvider
     {
         //
     }
+
     /**
      * Boot the authentication services for the application.
      *

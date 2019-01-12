@@ -49,12 +49,12 @@ class Weather
      * @param int $type an unit type
      * @return float
      */
-    public function temp($type = self::TEMP_TYPE_FAHRENHEIT): float
+    public function temperature($type = self::TEMP_TYPE_FAHRENHEIT): float
     {
         if ($type === self::TEMP_TYPE_CELSIUS) {
-            return ($this->temp - 32) / 1.8;
+            return ($this->temperature - 32) / 1.8;
         }
-        return $this->temp;
+        return $this->temperature;
     }
 
     /**
@@ -64,7 +64,7 @@ class Weather
     {
         return [
             'main' => $this->main,
-            'temp' => $this->temp,
+            'temperature' => $this->temperature,
             'pressure' => $this->pressure,
             'humidity' => $this->humidity,
         ];

@@ -14,6 +14,7 @@ class User extends RestController
     /**
      * @OA\Post(
      *  path="/users",
+     *  description="Add new user (sign up)",
      *  @OA\RequestBody(
      *      @OA\MediaType(
      *          mediaType="application/x-www-form-urlencoded",
@@ -40,7 +41,7 @@ class User extends RestController
      *  ),
      *  @OA\Response(
      *      response="200",
-     *      description="Add new user",
+     *      description="User successfully added",
      *      @OA\JsonContent(
      *          @OA\Property(property="user", ref="#/components/schemas/UserPresenter"),
      *          @OA\Property(property="token", ref="#/components/schemas/JWT")
@@ -91,6 +92,7 @@ class User extends RestController
     /**
      * @OA\Post(
      *  path="/auth",
+     *  description="Authorize user by credentials",
      *  @OA\RequestBody(
      *      @OA\JsonContent(
      *          @OA\Parameter(
@@ -109,7 +111,7 @@ class User extends RestController
      *  ),
      *  @OA\Response(
      *      response="200",
-     *      description="Authorize user by credentials",
+     *      description="User is authorized",
      *      @OA\JsonContent(
      *          @OA\Property(property="user", ref="#/components/schemas/UserPresenter"),
      *          @OA\Property(property="token", ref="#/components/schemas/JWT")

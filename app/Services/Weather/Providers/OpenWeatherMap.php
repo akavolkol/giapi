@@ -3,26 +3,33 @@
 namespace App\Services\Weather\Providers;
 
 use App\Services\Weather\Provider;
-use GuzzleHttp\Client;
 use App\Models\Weather;
 
 class OpenWeatherMap extends Provider
 {
+    /**
+     * {@inheritDoc}
+     */
     public function current(string $location): ?Weather
     {
-        $client = new Client();
         $appId = $this->config->get('app.openWeatherAppId');
-        $res = $client->request(
+        $res = $this->client()->request(
             'GET',
-            "http://api.openweathermap.org/data/2.5/weather?q={$location}&APPID={$appId}"
+            "https://api.openweathermap.org/data/2.5/weather?q={$location}&APPID={$appId}&units=imperial"
         );
-        $res->getStatusCode();
+        if ($res->getStatusCode() < 200 || $res->getStatusCode() > 299) {
+            return null;
+        }
         $data = json_decode($res->getBody(), true);
         return is_array($data)
             ? $this->getModel($data)
             : null;
     }
 
+    /**
+     * @param array $data
+     * @return Weather
+     */
     protected function getModel(array $data): Weather
     {
         return new Weather(

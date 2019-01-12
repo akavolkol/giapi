@@ -16,6 +16,7 @@ class GitHubUser extends RestController
      *  security={
      *      {"bearerAuth": {}}
      *  },
+     *  description="Emails to GitHub users",
      *  @OA\RequestBody(
      *      @OA\JsonContent(
      *          @OA\Property(
@@ -96,7 +97,11 @@ class GitHubUser extends RestController
         );
     }
 
-    protected function getErrorPresenter(string $message)
+    /**
+     * @param string $message
+     * @return Error
+     */
+    protected function getErrorPresenter(string $message): Error
     {
         return new Error($message);
     }
